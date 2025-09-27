@@ -1,0 +1,350 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> JavaScript Objects - Interactive Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .property-card {
+            transition: transform 0.2s;
+        }
+        .property-card:hover {
+            transform: scale(1.05);
+        }
+        pre code {
+            background-color: #1f2937;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: block;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 max-w-4xl">
+        <h1 class="text-4xl font-bold text-center text-blue-600 mb-6"> JavaScript Objects</h1>
+
+        <!-- Objective -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Objective</h2>
+            <p class="text-lg text-gray-600">Students will learn about JavaScript Objects.</p>
+        </section>
+
+        <!-- Real Life Objects -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Real Life Objects, Properties, and Methods</h2>
+            <p class="text-lg text-gray-600 mb-2">In real life, a car is an object.</p>
+            <p class="text-lg text-gray-600 mb-2">A car has properties like weight and colour, and methods like start and stop.</p>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Fiat_500_Abarth_front.JPG" alt="White Fiat 500 Car" class="mx-auto mb-4 rounded-lg shadow-md">
+            <table class="table-auto w-full mb-4">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Object</th>
+                        <th class="px-4 py-2">Properties</th>
+                        <th class="px-4 py-2">Methods</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border px-4 py-2">Car</td>
+                        <td class="border px-4 py-2">carname = Fiat<br>carmodel = 500<br>carweight = 850kg<br>carcolor = white</td>
+                        <td class="border px-4 py-2">car.start()<br>car.drive()<br>car.brake()<br>car.stop()</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="text-lg text-gray-600">All cars have the same properties, but the property values differ from car to car. All cars have the same methods, but the methods are performed at different times.</p>
+        </section>
+
+        <!-- JavaScript Objects -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">JavaScript Objects</h2>
+            <p class="text-lg text-gray-600 mb-2">You have already learned that JavaScript variables are containers for data values.</p>
+            <pre><code>var car = "Toyota";</code></pre>
+            <p class="text-lg text-gray-600 mb-2">Objects are variables too. But objects can contain many values.</p>
+            <pre><code>const car = {type:"Toyota", model:"500", color:"white"};</code></pre>
+            <p class="text-lg text-gray-600 mb-2">A const is a variable, similar to var, used to declare an object.</p>
+            <p class="text-lg text-gray-600 mb-2">The code to access the value of a property is simply objectName.propertyName</p>
+            <pre><code>var brandOfCar = car.type;<br>var colourOfCar = car.color;</code></pre>
+        </section>
+
+        <!-- Task 1 -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Task 1 – Object Definition</h2>
+            <p class="text-lg text-gray-600 mb-2">In this interactive version, explore the car object below.</p>
+            <!-- Interactive Car Object -->
+            <div id="task1Output" class="mb-4">
+                <p id="brand"></p>
+                <p id="model"></p>
+                <p id="color"></p>
+            </div>
+            <pre><code>// myScript.js<br>const car = {type:"Audi", model:"Q3", color:"blue"};<br>document.getElementById("brand").innerHTML = car.type;<br>document.getElementById("model").innerHTML = car.model;<br>document.getElementById("color").innerHTML = car.color;</code></pre>
+        </section>
+
+        <!-- Task 2 -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Task 2 – Object Methods</h2>
+            <p class="text-lg text-gray-600 mb-2">Objects can also have methods. Methods are actions that can be performed on objects. Methods are stored in properties as function definitions.</p>
+            <div class="mb-4">
+                <button id="startBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Start Engine</button>
+                <button id="stopBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Stop Engine</button>
+            </div>
+            <p id="status" class="text-lg font-semibold"></p>
+            <pre><code>// Modified myScript.js<br>const car = {<br>  type:"Audi",<br>  model:"Q3",<br>  color:"blue",<br>  start: function() {<br>    document.getElementById("status").innerHTML = "started!";<br>  },<br>  stop: function() {<br>    document.getElementById("status").innerHTML = "stopped!";<br>  }<br>};<br>function startCar() {<br>  car.start();<br>}<br>function stopCar() {<br>  car.stop();<br>}</code></pre>
+        </section>
+
+        <!-- Interactive Section -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Interactive Car Object</h2>
+            <p class="text-lg text-gray-600 mb-4">Modify the car object properties and see changes in real-time.</p>
+            <div id="carObject" class="flex flex-wrap gap-4 mb-4"></div>
+            <p class="text-lg font-semibold">Number of Properties: <span id="propertyCount" class="text-blue-600">3</span></p>
+
+            <!-- Modify Property -->
+            <div class="mt-4">
+                <label for="propertyInput" class="text-lg text-gray-600">Modify property:</label>
+                <input id="propertyInput" type="text" class="border p-2 rounded w-40 mx-2" placeholder="e.g., type">
+                <input id="valueInput" type="text" class="border p-2 rounded" placeholder="New value">
+                <button id="modifyBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Modify</button>
+            </div>
+
+            <!-- Add Property -->
+            <div class="mt-4">
+                <label for="newPropertyInput" class="text-lg text-gray-600">Add new property:</label>
+                <input id="newPropertyInput" type="text" class="border p-2 rounded w-40 mx-2" placeholder="New property">
+                <input id="newValueInput" type="text" class="border p-2 rounded" placeholder="Value">
+                <button id="addBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add</button>
+            </div>
+
+            <!-- Delete Property -->
+            <div class="mt-4">
+                <label for="deletePropertyInput" class="text-lg text-gray-600">Delete property:</label>
+                <input id="deletePropertyInput" type="text" class="border p-2 rounded w-40" placeholder="Property to delete">
+                <button id="deleteBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
+            </div>
+        </section>
+
+        <!-- Questions Section -->
+        <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Try These Questions!</h2>
+            <p class="text-lg text-gray-600 mb-4">Use the interactive sections above to answer the following questions.</p>
+
+            <!-- Question 1 -->
+            <div class="mb-6">
+                <p class="text-lg font-semibold">Question 1: What is the initial color of the car in Task 1?</p>
+                <input id="q1Input" type="text" class="border p-2 rounded w-64" placeholder="Enter color">
+                <button id="q1Btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 ml-2">Check Answer</button>
+                <p id="q1Feedback" class="text-lg mt-2"></p>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="mb-6">
+                <p class="text-lg font-semibold">Question 2: Change the model to "A4" using the interactive section. What is the new model?</p>
+                <input id="q2Input" type="text" class="border p-2 rounded w-64" placeholder="Enter new model">
+                <button id="q2Btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 ml-2">Check Answer</button>
+                <p id="q2Feedback" class="text-lg mt-2"></p>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="mb-6">
+                <p class="text-lg font-semibold">Question 3: Add a "year" property with value "2020". What is the new number of properties?</p>
+                <input id="q3Input" type="number" class="border p-2 rounded w-64" placeholder="Enter number">
+                <button id="q3Btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 ml-2">Check Answer</button>
+                <p id="q3Feedback" class="text-lg mt-2"></p>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="mb-6">
+                <p class="text-lg font-semibold">Question 4: Click "Start Engine" in Task 2. What text is displayed?</p>
+                <input id="q4Input" type="text" class="border p-2 rounded w-64" placeholder="Enter text">
+                <button id="q4Btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 ml-2">Check Answer</button>
+                <p id="q4Feedback" class="text-lg mt-2"></p>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="mb-6">
+                <p class="text-lg font-semibold">Question 5: After starting, click "Stop Engine". What text is now displayed?</p>
+                <input id="q5Input" type="text" class="border p-2 rounded w-64" placeholder="Enter text">
+                <button id="q5Btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 ml-2">Check Answer</button>
+                <p id="q5Feedback" class="text-lg mt-2"></p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Task 1 Simulation
+        const car = {type: "Audi", model: "Q3", color: "blue"};
+        document.getElementById("brand").innerHTML = "The brand of the car is " + car.type;
+        document.getElementById("model").innerHTML = "The model of the car is " + car.model;
+        document.getElementById("color").innerHTML = "The colour of the car is " + car.color;
+
+        // Task 2 Methods
+        car.start = function() {
+            document.getElementById("status").innerHTML = "The car engine is started!";
+        };
+        car.stop = function() {
+            document.getElementById("status").innerHTML = "The car engine is stopped!";
+        };
+        document.getElementById("startBtn").onclick = car.start;
+        document.getElementById("stopBtn").onclick = car.stop;
+
+        // Interactive Section
+        function updateObjectDisplay() {
+            const objectDiv = document.getElementById("carObject");
+            objectDiv.innerHTML = "";
+            for (const [key, value] of Object.entries(car)) {
+                if (typeof value !== "function") {
+                    const card = document.createElement("div");
+                    card.className = "property-card bg-blue-100 p-4 rounded shadow cursor-pointer";
+                    card.innerText = `${key}: ${value}`;
+                    card.onclick = () => alert(`Property: ${key}, Value: ${value}`);
+                    objectDiv.appendChild(card);
+                }
+            }
+            document.getElementById("propertyCount").innerText = Object.keys(car).filter(key => typeof car[key] !== "function").length;
+        }
+
+        updateObjectDisplay();
+
+        document.getElementById("modifyBtn").onclick = () => {
+            const property = document.getElementById("propertyInput").value.trim();
+            const value = document.getElementById("valueInput").value.trim();
+            if (property && value && property in car && typeof car[property] !== "function") {
+                car[property] = value;
+                updateObjectDisplay();
+                document.getElementById("propertyInput").value = "";
+                document.getElementById("valueInput").value = "";
+            } else {
+                alert("Please enter a valid existing non-method property and value.");
+            }
+        };
+
+        document.getElementById("addBtn").onclick = () => {
+            const property = document.getElementById("newPropertyInput").value.trim();
+            const value = document.getElementById("newValueInput").value.trim();
+            if (property && value && !(property in car)) {
+                car[property] = value;
+                updateObjectDisplay();
+                document.getElementById("newPropertyInput").value = "";
+                document.getElementById("newValueInput").value = "";
+            } else {
+                alert("Please enter a new property name and value.");
+            }
+        };
+
+        document.getElementById("deleteBtn").onclick = () => {
+            const property = document.getElementById("deletePropertyInput").value.trim();
+            if (property && property in car && typeof car[property] !== "function") {
+                delete car[property];
+                updateObjectDisplay();
+                document.getElementById("deletePropertyInput").value = "";
+            } else {
+                alert("Please enter a valid non-method property to delete.");
+            }
+        };
+
+        // Questions
+        document.getElementById("q1Btn").onclick = () => {
+            const answer = document.getElementById("q1Input").value.trim().toLowerCase();
+            const feedback = document.getElementById("q1Feedback");
+            if (answer === "blue") {
+                feedback.innerText = "Correct!";
+                feedback.className = "text-lg mt-2 text-green-600";
+            } else {
+                feedback.innerText = "Incorrect. Check Task 1.";
+                feedback.className = "text-lg mt-2 text-red-600";
+            }
+        };
+
+        document.getElementById("q2Btn").onclick = () => {
+            const answer = document.getElementById("q2Input").value.trim();
+            const feedback = document.getElementById("q2Feedback");
+            if (answer === car.model) {
+                feedback.innerText = answer === "A4" ? "Correct!" : "Incorrect. Did you change it to 'A4'?";
+                feedback.className = "text-lg mt-2 " + (answer === "A4" ? "text-green-600" : "text-red-600");
+            } else {
+                feedback.innerText = "Incorrect. Enter the current model after change.";
+                feedback.className = "text-lg mt-2 text-red-600";
+            }
+        };
+
+        document.getElementById("q3Btn").onclick = () => {
+            const answer = parseInt(document.getElementById("q3Input").value);
+            const feedback = document.getElementById("q3Feedback");
+            const count = Object.keys(car).filter(key => typeof car[key] !== "function").length;
+            if ("year" in car && car.year === "2020" && answer === count) {
+                feedback.innerText = "Correct!";
+                feedback.className = "text-lg mt-2 text-green-600";
+            } else {
+                feedback.innerText = "Incorrect. Add 'year: 2020' and check count.";
+                feedback.className = "text-lg mt-2 text-red-600";
+            }
+        };
+
+        document.getElementById("q4Btn").onclick = () => {
+            const answer = document.getElementById("q4Input").value.trim().toLowerCase();
+            const feedback = document.getElementById("q4Feedback");
+            if (answer.includes("started")) {
+                feedback.innerText = "Correct!";
+                feedback.className = "text-lg mt-2 text-green-600";
+            } else {
+                feedback.innerText = "Incorrect. Try clicking the button.";
+                feedback.className = "text-lg mt-2 text-red-600";
+            }
+        };
+
+        document.getElementById("q5Btn").onclick = () => {
+            const answer = document.getElementById("q5Input").value.trim().toLowerCase();
+            const feedback = document.getElementById("q5Feedback");
+            if (answer.includes("stopped")) {
+                feedback.innerText = "Correct!";
+                feedback.className = "text-lg mt-2 text-green-600";
+            } else {
+                feedback.innerText = "Incorrect. Try clicking the button after starting.";
+                feedback.className = "text-lg mt-2 text-red-600";
+            }
+        };
+    </script>
+</body>
+</html>
